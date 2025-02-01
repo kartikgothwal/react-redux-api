@@ -1,10 +1,11 @@
 // src/redux/userSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { fetchUserData } from './userAPI';
 
 // Async thunk to fetch data
 export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
-  const response = await axios.get('https://jsonplaceholder.typicode.com/users');
+
+  const response = await fetchUserData()
   return response.data;
 });
 

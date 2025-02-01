@@ -2,7 +2,6 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
-  // createRow,
   type MRT_ColumnDef,
   type MRT_Row,
   type MRT_TableOptions,
@@ -106,7 +105,6 @@ const UserDetail = () => {
   //call CREATE hook
   const { mutateAsync: createUser, isPending: isCreatingUser } =
     useCreateUser();
-  //call READ hook
   const {
     data: fetchedUsers = [],
     isError: isLoadingUsersError,
@@ -116,7 +114,7 @@ const UserDetail = () => {
   //call UPDATE hook
   const { mutateAsync: updateUser, isPending: isUpdatingUser } =
     useUpdateUser();
-  //call DELETE hook
+
   const { mutateAsync: deleteUser, isPending: isDeletingUser } =
     useDeleteUser();
 
@@ -160,8 +158,8 @@ const UserDetail = () => {
   const table = useMaterialReactTable({
     columns,
     data: fetchedUsers,
-    createDisplayMode: "modal", //default ('row', and 'custom' are also available)
-    editDisplayMode: "modal", //default ('row', 'cell', 'table', and 'custom' are also available)
+    createDisplayMode: "modal",
+    editDisplayMode: "modal",
     enableEditing: true,
     getRowId: (row) => row.id,
     muiToolbarAlertBannerProps: isLoadingUsersError
@@ -186,7 +184,7 @@ const UserDetail = () => {
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
-          {internalEditComponents} {/* or render custom edit components here */}
+          {internalEditComponents}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -200,7 +198,7 @@ const UserDetail = () => {
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
-          {internalEditComponents} {/* or render custom edit components here */}
+          {internalEditComponents}
         </DialogContent>
         <DialogActions>
           <MRT_EditActionButtons variant="text" table={table} row={row} />
@@ -248,7 +246,6 @@ const UserDetail = () => {
   return <MaterialReactTable table={table} />;
 };
 
-//CREATE hook (post new user to api)
 function useCreateUser() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -305,7 +302,6 @@ function useUpdateUser() {
         )
       );
     },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
   });
 }
 
@@ -330,11 +326,10 @@ function useDeleteUser() {
 
 //react query setup in App.tsx
 const ReactQueryDevtoolsProduction = lazy(() =>
-  import('@tanstack/react-query-devtools').then((d) => ({
+  import("@tanstack/react-query-devtools").then((d) => ({
     default: d.ReactQueryDevtools,
   }))
 );
-
 
 const queryClient = new QueryClient();
 
