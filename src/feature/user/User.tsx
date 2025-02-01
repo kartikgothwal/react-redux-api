@@ -20,14 +20,13 @@ import {
   QueryClient,
   QueryClientProvider,
   useMutation,
-  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type User, fakeData, usStates } from "../../utils/index";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
-import { FetchUsers, UpdateUser, AddUser, DeleteUser } from "./userSlice";
+import { FetchUsers, UpdateUser, DeleteUser, AddUser } from "./userSlice";
+import { IUser } from "../../types";
 const UserDetail = () => {
   const users = useSelector((state) => state.users.users);
   const pending = useSelector((state) => state.users.pending);
@@ -132,26 +131,19 @@ const UserDetail = () => {
     [validationErrors]
   );
 
-  const { mutateAsync: createUser, isPending: isCreatingUser } =
-    useCreateUser();
-  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
-    useUpdateUser();
+  const handleCreateUser: MRT_TableOptions<IUser>["onCreatingRowSave"] =
+    async ({ values, table }) => {
+      const newValidationErrors = validateUser(values);
+      if (Object.values(newValidationErrors).some((error) => error)) {
+        setValidationErrors(newValidationErrors);
+        return;
+      }
+      setValidationErrors({});
+      await dispatch(AddUser(values));
+      table.setCreatingRow(null);
+    };
 
-  const handleCreateUser: MRT_TableOptions<User>["onCreatingRowSave"] = async ({
-    values,
-    table,
-  }) => {
-    const newValidationErrors = validateUser(values);
-    if (Object.values(newValidationErrors).some((error) => error)) {
-      setValidationErrors(newValidationErrors);
-      return;
-    }
-    setValidationErrors({});
-    await createUser(values);
-    table.setCreatingRow(null);
-  };
-
-  const handleSaveUser: MRT_TableOptions<User>["onEditingRowSave"] = async ({
+  const handleSaveUser: MRT_TableOptions<IUser>["onEditingRowSave"] = async ({
     values,
     table,
   }) => {
@@ -166,7 +158,7 @@ const UserDetail = () => {
   };
 
   const openDeleteConfirmModal = (row: MRT_Row<User>) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {;
+    if (window.confirm("Are you sure you want to delete this user?")) {
       dispatch(DeleteUser(row.original.id));
     }
   };
@@ -251,7 +243,7 @@ const UserDetail = () => {
     ),
     state: {
       isLoading: pending,
-      isSaving: isCreatingUser || isUpdatingUser,
+      isSaving: pending,
       showAlertBanner: pending,
       showProgressBars: pending,
     },
@@ -260,51 +252,6 @@ const UserDetail = () => {
   return <MaterialReactTable table={table} />;
 };
 
-function useCreateUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (user: User) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newUserInfo: User) => {
-      queryClient.setQueryData(
-        ["users"],
-        (prevUsers: any) =>
-          [
-            ...prevUsers,
-            {
-              ...newUserInfo,
-              id: (Math.random() + 1).toString(36).substring(7),
-            },
-          ] as User[]
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
-
-//UPDATE hook (put user in api)
-function useUpdateUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (user: User) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (newUserInfo: User) => {
-      queryClient.setQueryData(["users"], (prevUsers: any) =>
-        prevUsers?.map((prevUser: User) =>
-          prevUser.id === newUserInfo.id ? newUserInfo : prevUser
-        )
-      );
-    },
-  });
-}
 const ReactQueryDevtoolsProduction = lazy(() =>
   import("@tanstack/react-query-devtools").then((d) => ({
     default: d.ReactQueryDevtools,
@@ -324,7 +271,10 @@ export default function App() {
   );
 }
 
-const validateRequired = (value: string) => !!value.length;
+const validateRequired = (value: string) =>
+  !!value.length && value.trim() !== "" && typeof value === "string";
+const validateNumber = (value: string) =>
+  !!value.length && /^[0-9]{10}$/.test(value);
 const validateEmail = (email: string) =>
   !!email.length &&
   email
@@ -333,11 +283,13 @@ const validateEmail = (email: string) =>
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     );
 
-function validateUser(user: User) {
+function validateUser(user: IUser) {
   return {
     name: !validateRequired(user.name) ? "Name is Required" : "",
     email: !validateEmail(user.email) ? "Incorrect Email Format" : "",
-    phone: !validateRequired(user.phone) ? "Phone is Required" : "",
+    phone: !validateNumber(user.phone)
+      ? "Incorrect Number Format, should be 10 numbers"
+      : "",
     city: !validateRequired(user.city) ? "City is Required" : "",
     zipcode: !validateRequired(user.zipcode) ? "Zip Code Name is Required" : "",
   };

@@ -28,10 +28,13 @@ export const UpdateUser = createAsyncThunk(
     return response;
   }
 );
-export const AddUser = createAsyncThunk("users/addUser", async () => {
-  const response = await addUserData("dsfds");
-  return response;
-});
+export const AddUser = createAsyncThunk(
+  "users/addUser",
+  async (userData: IUser) => {
+    const response = await addUserData(userData);
+    return response;
+  }
+);
 export const DeleteUser = createAsyncThunk(
   "users/deleteUser",
   async (id: number) => {
@@ -83,8 +86,10 @@ const userSlice = createSlice({
       })
       .addCase(AddUser.fulfilled, (state, action) => {
         state.pending = false;
-        state.users = action.payload;
-      })
+        state.users = [...state.users, action.payload];
+        SuccessToast("User Successfully Added at the End");
+
+       })
       .addCase(AddUser.rejected, (state, action) => {
         state.pending = false;
         FailureToast("Failed to add user");

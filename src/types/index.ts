@@ -1,5 +1,5 @@
 export interface IUserResponse {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string;
@@ -10,7 +10,7 @@ export interface IUserResponse {
 }
 
 export interface IUser {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone: string;
