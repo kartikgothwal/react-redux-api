@@ -17,3 +17,9 @@ export interface IUser {
   city: string;
   zipcode: string;
 }
+
+export interface UserState {
+  users: IUser[]; 
+  pending: boolean;
+  error: string;
+}

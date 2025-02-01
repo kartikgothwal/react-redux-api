@@ -5,7 +5,7 @@ import {
   addUserData,
   deleteUserData,
 } from "./userAPI";
-import { IUser, IUserResponse } from "../../types";
+import { IUser, IUserResponse, UserState } from "../../types";
 import { FailureToast, SuccessToast } from "../../utils/toast";
 
 export const FetchUsers = createAsyncThunk("users/FetchUsers", async () => {
@@ -24,7 +24,7 @@ export const FetchUsers = createAsyncThunk("users/FetchUsers", async () => {
 export const UpdateUser = createAsyncThunk(
   "users/updateUser",
   async (userData: Partial<IUser>) => {
-    const response: IUserResponse[] = await updateUserData(userData);
+    const response: IUser = await updateUserData(userData);
     return response;
   }
 );
@@ -37,19 +37,20 @@ export const AddUser = createAsyncThunk(
 );
 export const DeleteUser = createAsyncThunk(
   "users/deleteUser",
-  async (id: number) => {
+  async (id: string) => {
     await deleteUserData(id);
     return { id };
   }
 );
+const initialState: UserState = {
+  users: [],
+  pending: false,
+  error: "",
+};
 
 const userSlice = createSlice({
   name: "users",
-  initialState: {
-    users: [],
-    pending: false,
-    error: "",
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -63,7 +64,7 @@ const userSlice = createSlice({
       .addCase(FetchUsers.rejected, (state, action) => {
         state.pending = false;
         FailureToast("Failed to fetch users");
-        state.error = action.error.message;
+        state.error = action.error.message || "An unknown error occurred";
       })
       .addCase(UpdateUser.pending, (state) => {
         state.pending = true;
@@ -73,13 +74,15 @@ const userSlice = createSlice({
         const targetIndex = state.users.findIndex(
           (user) => user.id === action.payload.id
         );
-        state.users.splice(targetIndex, 1, action.payload);
+        if (targetIndex !== -1) {
+          state.users.splice(targetIndex, 1, action.payload);
+        }
         SuccessToast("User Updated Successfully");
       })
       .addCase(UpdateUser.rejected, (state, action) => {
         state.pending = false;
         FailureToast("Failed to update user");
-        state.error = action.error.message;
+        state.error = action.error.message || "An unknown error occurred";
       })
       .addCase(AddUser.pending, (state) => {
         state.pending = true;
@@ -88,12 +91,11 @@ const userSlice = createSlice({
         state.pending = false;
         state.users = [...state.users, action.payload];
         SuccessToast("User Successfully Added at the End");
-
-       })
+      })
       .addCase(AddUser.rejected, (state, action) => {
         state.pending = false;
         FailureToast("Failed to add user");
-        state.error = action.error.message;
+        state.error = action.error.message || "An unknown error occurred";
       })
       .addCase(DeleteUser.pending, (state) => {
         state.pending = true;
@@ -102,13 +104,13 @@ const userSlice = createSlice({
         state.pending = false;
         SuccessToast("User Deleted Successfully");
         state.users = state.users.filter(
-          (user: { id: number }) => user.id != action.payload.id
+          (user: { id: string }) => user.id != action.payload.id.toString()
         );
       })
       .addCase(DeleteUser.rejected, (state, action) => {
         state.pending = false;
         FailureToast("Failed to delete user");
-        state.error = action.error.message;
+        state.error = action.error.message || "An unknown error occurred";
       });
   },
 });

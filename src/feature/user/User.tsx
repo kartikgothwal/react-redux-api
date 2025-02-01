@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
@@ -16,22 +16,23 @@ import {
   IconButton,
   Tooltip,
 } from "@mui/material";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
 import { FetchUsers, UpdateUser, DeleteUser, AddUser } from "./userSlice";
 import { IUser } from "../../types";
+import { AppDispatch } from "../../app/store";
 const UserDetail = () => {
-  const users = useSelector((state) => state.users.users);
-  const pending = useSelector((state) => state.users.pending);
-  const error = useSelector((state) => state.users.error);
-  const dispatch = useDispatch();
+  const users = useSelector(
+    (state: { users: { users: IUser[] } }) => state.users.users
+  );
+  const pending = useSelector(
+    (state: { users: { pending: boolean } }) => state.users.pending
+  );
+  const error = useSelector(
+    (state: { users: { error: string } }) => state.users.error
+  );
+  const dispatch = useDispatch<AppDispatch>();
 
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
@@ -39,7 +40,7 @@ const UserDetail = () => {
   useEffect(() => {
     dispatch(FetchUsers());
   }, [dispatch]);
-  const columns = useMemo<MRT_ColumnDef<User>[]>(
+  const columns = useMemo<MRT_ColumnDef<IUser>[]>(
     () => [
       {
         accessorKey: "id",
@@ -157,7 +158,7 @@ const UserDetail = () => {
     table.setEditingRow(null);
   };
 
-  const openDeleteConfirmModal = (row: MRT_Row<User>) => {
+  const openDeleteConfirmModal = (row: MRT_Row<IUser>) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       dispatch(DeleteUser(row.original.id));
     }
@@ -252,22 +253,12 @@ const UserDetail = () => {
   return <MaterialReactTable table={table} />;
 };
 
-const ReactQueryDevtoolsProduction = lazy(() =>
-  import("@tanstack/react-query-devtools").then((d) => ({
-    default: d.ReactQueryDevtools,
-  }))
-);
-
-const queryClient = new QueryClient();
-
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <UserDetail />
-      <Suspense fallback={null}>
-        <ReactQueryDevtoolsProduction />
-      </Suspense>
-    </QueryClientProvider>
+      <Suspense fallback={null}></Suspense>
+    </>
   );
 }
 
