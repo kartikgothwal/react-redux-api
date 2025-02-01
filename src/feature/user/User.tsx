@@ -30,7 +30,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { FetchUsers, UpdateUser, AddUser, DeleteUser } from "./userSlice";
 const UserDetail = () => {
   const users = useSelector((state) => state.users.users);
-  console.log("🚀 ~ UserDetail ~ users:", users);
   const pending = useSelector((state) => state.users.pending);
   const error = useSelector((state) => state.users.error);
   const dispatch = useDispatch();
@@ -46,32 +45,18 @@ const UserDetail = () => {
       {
         accessorKey: "id",
         header: "Id",
+        enableColumnActions: false,
         enableEditing: false,
         size: 80,
       },
       {
-        accessorKey: "firstName",
-        header: "First Name",
-        muiEditTextFieldProps: {
-          required: true,
-          error: !!validationErrors?.firstName,
-          helperText: validationErrors?.firstName,
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              firstName: undefined,
-            }),
-          //optionally add validation checking for onBlur or onChange
-        },
-      },
-      {
-        accessorKey: "lastName",
-        header: "Last Name",
+        accessorKey: "name",
+        header: "Full Name",
+        enableColumnActions: false,
         muiEditTextFieldProps: {
           required: true,
           error: !!validationErrors?.lastName,
           helperText: validationErrors?.lastName,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
@@ -82,6 +67,7 @@ const UserDetail = () => {
       {
         accessorKey: "email",
         header: "Email",
+        enableColumnActions: false,
         muiEditTextFieldProps: {
           type: "email",
           required: true,
@@ -95,14 +81,51 @@ const UserDetail = () => {
         },
       },
       {
-        accessorKey: "state",
-        header: "State",
-        editVariant: "select",
-        editSelectOptions: usStates,
+        accessorKey: "phone",
+        header: "Phone",
+        enableColumnActions: false,
         muiEditTextFieldProps: {
-          select: true,
-          error: !!validationErrors?.state,
-          helperText: validationErrors?.state,
+          type: "string",
+          required: true,
+          error: !!validationErrors?.email,
+          helperText: validationErrors?.email,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              email: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "city",
+        header: "City",
+        enableColumnActions: false,
+        muiEditTextFieldProps: {
+          type: "string",
+          required: true,
+          error: !!validationErrors?.email,
+          helperText: validationErrors?.email,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              email: undefined,
+            }),
+        },
+      },
+      {
+        accessorKey: "zipcode",
+        header: "Zip Code",
+        enableColumnActions: false,
+        muiEditTextFieldProps: {
+          type: "string",
+          required: true,
+          error: !!validationErrors?.email,
+          helperText: validationErrors?.email,
+          onFocus: () =>
+            setValidationErrors({
+              ...validationErrors,
+              email: undefined,
+            }),
         },
       },
     ],
@@ -111,12 +134,6 @@ const UserDetail = () => {
 
   const { mutateAsync: createUser, isPending: isCreatingUser } =
     useCreateUser();
-  const {
-    data: fetchedUsers = [],
-    isError: isLoadingUsersError,
-    isFetching: isFetchingUsers,
-    isLoading: isLoadingUsers,
-  } = useGetUsers();
   const { mutateAsync: updateUser, isPending: isUpdatingUser } =
     useUpdateUser();
 
@@ -152,19 +169,25 @@ const UserDetail = () => {
   };
 
   const openDeleteConfirmModal = (row: MRT_Row<User>) => {
+    console.log("🚀 ~ openDeleteConfirmModal ~ row:", row);
     if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUser(row.original.id);
+      dispatch(DeleteUser(row.original.id));
     }
   };
 
   const table = useMaterialReactTable({
     columns,
-    data: fetchedUsers,
+    data: users,
     createDisplayMode: "modal",
     editDisplayMode: "modal",
     enableEditing: true,
+    enableSorting: false,
+    enableFilters: false,
+    enableHiding: false,
+    enableFullScreenToggle: false,
+    enableDensityToggle: false,
     getRowId: (row) => row.id,
-    muiToolbarAlertBannerProps: isLoadingUsersError
+    muiToolbarAlertBannerProps: error
       ? {
           color: "error",
           children: "Error loading data",
@@ -172,7 +195,8 @@ const UserDetail = () => {
       : undefined,
     muiTableContainerProps: {
       sx: {
-        minHeight: "500px",
+        minHeight: "400px",
+        margin: "1rem",
       },
     },
     onCreatingRowCancel: () => setValidationErrors({}),
@@ -192,7 +216,6 @@ const UserDetail = () => {
         </DialogActions>
       </>
     ),
-    //optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
         <DialogTitle variant="h5">Edit User</DialogTitle>
@@ -224,23 +247,17 @@ const UserDetail = () => {
       <Button
         variant="contained"
         onClick={() => {
-          table.setCreatingRow(true); //simplest way to open the create row modal with no default values
-          //or you can pass in a row object to set default values with the `createRow` helper function
-          // table.setCreatingRow(
-          //   createRow(table, {
-          //     //optionally pass in default values for the new row, useful for nested data or other complex scenarios
-          //   }),
-          // );
+          table.setCreatingRow(true);
         }}
       >
         Create New User
       </Button>
     ),
     state: {
-      isLoading: isLoadingUsers,
+      isLoading: pending,
       isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
-      showAlertBanner: isLoadingUsersError,
-      showProgressBars: isFetchingUsers,
+      showAlertBanner: pending,
+      showProgressBars: pending,
     },
   });
 

@@ -13,7 +13,7 @@ export const addUserData = async (userData: any) => {
   return response.data;
 };
 
-export const deleteUserData = async (userId: any) => {
+export const deleteUserData = async (userId: number) => {
   const response = await axios.delete(`${API_URL}/users/${userId}`);
   return response.data;
 };

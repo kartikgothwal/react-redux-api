@@ -5,30 +5,52 @@ import {
   addUserData,
   deleteUserData,
 } from "./userAPI";
+import { IUser, IUserResponse } from "../../types";
 
 export const FetchUsers = createAsyncThunk("users/FetchUsers", async () => {
   const response = await fetchUserData();
-   return response;
+  return response.map((users: IUserResponse): IUser => {
+    return {
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      phone: users.phone.split(" ")[0],
+      city: users.address.city,
+      zipcode: users.address.zipcode,
+    };
+  });
 });
 export const UpdateUser = createAsyncThunk("users/updateUser", async () => {
-  const response = await updateUserData("asds");
-  return response;
+  const response: IUserResponse[] = await updateUserData("asds");
+  return response.map((users: IUserResponse): IUser => {
+    return {
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      phone: users.phone,
+      city: users.address.city,
+      zipcode: users.address.zipcode,
+    };
+  });
 });
 export const AddUser = createAsyncThunk("users/addUser", async () => {
   const response = await addUserData("dsfds");
   return response;
 });
-export const DeleteUser = createAsyncThunk("users/deleteUser", async () => {
-  const response = await deleteUserData(1);
-  return response;
-});
+export const DeleteUser = createAsyncThunk(
+  "users/deleteUser",
+  async (id: number) => {
+    const response = await deleteUserData(id);
+    return { id };
+  }
+);
 
 const userSlice = createSlice({
   name: "users",
   initialState: {
     users: [],
     pending: false,
-    error: null,
+    error: "",
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -49,11 +71,10 @@ const userSlice = createSlice({
       })
       .addCase(UpdateUser.fulfilled, (state, action) => {
         state.pending = false;
-
         state.users = action.payload;
       })
       .addCase(UpdateUser.rejected, (state, action) => {
-        state.status = "failed";
+        state.pending = false;
         state.error = action.error.message;
       })
       .addCase(AddUser.pending, (state) => {
@@ -61,11 +82,10 @@ const userSlice = createSlice({
       })
       .addCase(AddUser.fulfilled, (state, action) => {
         state.pending = false;
-
         state.users = action.payload;
       })
       .addCase(AddUser.rejected, (state, action) => {
-        state.status = "failed";
+        state.pending = false;
         state.error = action.error.message;
       })
       .addCase(DeleteUser.pending, (state) => {
@@ -73,11 +93,12 @@ const userSlice = createSlice({
       })
       .addCase(DeleteUser.fulfilled, (state, action) => {
         state.pending = false;
-
-        state.users = action.payload;
+        state.users = state.users.filter(
+          (user: { id: number }) => user.id != action.payload.id
+        );
       })
       .addCase(DeleteUser.rejected, (state, action) => {
-        state.status = "failed";
+        state.pending = false;
         state.error = action.error.message;
       });
   },
