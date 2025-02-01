@@ -1,10 +1,10 @@
-import Table from "./feature/counter/Table"
+import User from "./feature/user/User"
 
  
 const App = () => {
   return (
     <div>
-      <Table />
+      <User />
     </div>
   )
 }
