@@ -26,8 +26,10 @@ import {
 import { type User, fakeData, usStates } from "../../utils/index";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useSelector } from "react-redux";
 
 const UserDetail = () => {
+  const users = useSelector((state) => state.users.users);
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
@@ -47,7 +49,6 @@ const UserDetail = () => {
           required: true,
           error: !!validationErrors?.firstName,
           helperText: validationErrors?.firstName,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
@@ -79,7 +80,6 @@ const UserDetail = () => {
           required: true,
           error: !!validationErrors?.email,
           helperText: validationErrors?.email,
-          //remove any previous validation errors when user focuses on the input
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
@@ -102,7 +102,6 @@ const UserDetail = () => {
     [validationErrors]
   );
 
-  //call CREATE hook
   const { mutateAsync: createUser, isPending: isCreatingUser } =
     useCreateUser();
   const {
@@ -111,14 +110,12 @@ const UserDetail = () => {
     isFetching: isFetchingUsers,
     isLoading: isLoadingUsers,
   } = useGetUsers();
-  //call UPDATE hook
   const { mutateAsync: updateUser, isPending: isUpdatingUser } =
     useUpdateUser();
 
   const { mutateAsync: deleteUser, isPending: isDeletingUser } =
     useDeleteUser();
 
-  //CREATE action
   const handleCreateUser: MRT_TableOptions<User>["onCreatingRowSave"] = async ({
     values,
     table,
@@ -133,7 +130,6 @@ const UserDetail = () => {
     table.setCreatingRow(null); //exit creating mode
   };
 
-  //UPDATE action
   const handleSaveUser: MRT_TableOptions<User>["onEditingRowSave"] = async ({
     values,
     table,
@@ -145,10 +141,9 @@ const UserDetail = () => {
     }
     setValidationErrors({});
     await updateUser(values);
-    table.setEditingRow(null); //exit editing mode
+    table.setEditingRow(null); 
   };
 
-  //DELETE action
   const openDeleteConfirmModal = (row: MRT_Row<User>) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       deleteUser(row.original.id);
@@ -177,10 +172,9 @@ const UserDetail = () => {
     onCreatingRowSave: handleCreateUser,
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveUser,
-    //optionally customize modal content
     renderCreateRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Create New User</DialogTitle>
+        <DialogTitle variant="h5">Create New User</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}
         >
@@ -194,7 +188,7 @@ const UserDetail = () => {
     //optionally customize modal content
     renderEditRowDialogContent: ({ table, row, internalEditComponents }) => (
       <>
-        <DialogTitle variant="h3">Edit User</DialogTitle>
+        <DialogTitle variant="h5">Edit User</DialogTitle>
         <DialogContent
           sx={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
