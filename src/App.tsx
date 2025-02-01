@@ -1,9 +1,10 @@
-import React from 'react'
+import Table from "./feature/counter/Table"
 
+ 
 const App = () => {
   return (
     <div>
-      <h1>Hello world</h1>
+      <Table />
     </div>
   )
 }
