@@ -55,12 +55,12 @@ const UserDetail = () => {
         enableColumnActions: false,
         muiEditTextFieldProps: {
           required: true,
-          error: !!validationErrors?.lastName,
-          helperText: validationErrors?.lastName,
+          error: !!validationErrors?.name,
+          helperText: validationErrors?.name,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              lastName: undefined,
+              name: undefined,
             }),
         },
       },
@@ -87,12 +87,12 @@ const UserDetail = () => {
         muiEditTextFieldProps: {
           type: "string",
           required: true,
-          error: !!validationErrors?.email,
-          helperText: validationErrors?.email,
+          error: !!validationErrors?.phone,
+          helperText: validationErrors?.phone,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              email: undefined,
+              phone: undefined,
             }),
         },
       },
@@ -103,12 +103,12 @@ const UserDetail = () => {
         muiEditTextFieldProps: {
           type: "string",
           required: true,
-          error: !!validationErrors?.email,
-          helperText: validationErrors?.email,
+          error: !!validationErrors?.city,
+          helperText: validationErrors?.city,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              email: undefined,
+              city: undefined,
             }),
         },
       },
@@ -119,12 +119,12 @@ const UserDetail = () => {
         muiEditTextFieldProps: {
           type: "string",
           required: true,
-          error: !!validationErrors?.email,
-          helperText: validationErrors?.email,
+          error: !!validationErrors?.zipcode,
+          helperText: validationErrors?.zipcode,
           onFocus: () =>
             setValidationErrors({
               ...validationErrors,
-              email: undefined,
+              zipcode: undefined,
             }),
         },
       },
@@ -137,9 +137,6 @@ const UserDetail = () => {
   const { mutateAsync: updateUser, isPending: isUpdatingUser } =
     useUpdateUser();
 
-  const { mutateAsync: deleteUser, isPending: isDeletingUser } =
-    useDeleteUser();
-
   const handleCreateUser: MRT_TableOptions<User>["onCreatingRowSave"] = async ({
     values,
     table,
@@ -151,7 +148,7 @@ const UserDetail = () => {
     }
     setValidationErrors({});
     await createUser(values);
-    table.setCreatingRow(null); //exit creating mode
+    table.setCreatingRow(null);
   };
 
   const handleSaveUser: MRT_TableOptions<User>["onEditingRowSave"] = async ({
@@ -164,13 +161,12 @@ const UserDetail = () => {
       return;
     }
     setValidationErrors({});
-    await updateUser(values);
+    dispatch(UpdateUser(values));
     table.setEditingRow(null);
   };
 
   const openDeleteConfirmModal = (row: MRT_Row<User>) => {
-    console.log("🚀 ~ openDeleteConfirmModal ~ row:", row);
-    if (window.confirm("Are you sure you want to delete this user?")) {
+    if (window.confirm("Are you sure you want to delete this user?")) {;
       dispatch(DeleteUser(row.original.id));
     }
   };
@@ -255,7 +251,7 @@ const UserDetail = () => {
     ),
     state: {
       isLoading: pending,
-      isSaving: isCreatingUser || isUpdatingUser || isDeletingUser,
+      isSaving: isCreatingUser || isUpdatingUser,
       showAlertBanner: pending,
       showProgressBars: pending,
     },
@@ -290,19 +286,6 @@ function useCreateUser() {
   });
 }
 
-//READ hook (get users from api)
-function useGetUsers() {
-  return useQuery<User[]>({
-    queryKey: ["users"],
-    queryFn: async () => {
-      //send api request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve(fakeData);
-    },
-    refetchOnWindowFocus: false,
-  });
-}
-
 //UPDATE hook (put user in api)
 function useUpdateUser() {
   const queryClient = useQueryClient();
@@ -322,27 +305,6 @@ function useUpdateUser() {
     },
   });
 }
-
-//DELETE hook (delete user in api)
-function useDeleteUser() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (userId: string) => {
-      //send api update request here
-      await new Promise((resolve) => setTimeout(resolve, 1000)); //fake api call
-      return Promise.resolve();
-    },
-    //client side optimistic update
-    onMutate: (userId: string) => {
-      queryClient.setQueryData(["users"], (prevUsers: any) =>
-        prevUsers?.filter((user: User) => user.id !== userId)
-      );
-    },
-    // onSettled: () => queryClient.invalidateQueries({ queryKey: ['users'] }), //refetch users after mutation, disabled for demo
-  });
-}
-
-//react query setup in App.tsx
 const ReactQueryDevtoolsProduction = lazy(() =>
   import("@tanstack/react-query-devtools").then((d) => ({
     default: d.ReactQueryDevtools,
@@ -373,10 +335,10 @@ const validateEmail = (email: string) =>
 
 function validateUser(user: User) {
   return {
-    firstName: !validateRequired(user.firstName)
-      ? "First Name is Required"
-      : "",
-    lastName: !validateRequired(user.lastName) ? "Last Name is Required" : "",
+    name: !validateRequired(user.name) ? "Name is Required" : "",
     email: !validateEmail(user.email) ? "Incorrect Email Format" : "",
+    phone: !validateRequired(user.phone) ? "Phone is Required" : "",
+    city: !validateRequired(user.city) ? "City is Required" : "",
+    zipcode: !validateRequired(user.zipcode) ? "Zip Code Name is Required" : "",
   };
 }
