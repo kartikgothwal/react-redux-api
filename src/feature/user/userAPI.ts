@@ -1,7 +1,7 @@
 // api.ts
 import axios from 'axios';
 
-const API_URL = 'https://jsonplaceholder.typicode.com/users';
+const API_URL = 'https://jsonplaceholder.typicode.com/';
 
 export const fetchUserData = async () => {
   const response = await axios.get(`${API_URL}/users`);

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   MRT_EditActionButtons,
   MaterialReactTable,
@@ -26,14 +26,21 @@ import {
 import { type User, fakeData, usStates } from "../../utils/index";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import { FetchUsers, UpdateUser, AddUser, DeleteUser } from "./userSlice";
 const UserDetail = () => {
   const users = useSelector((state) => state.users.users);
+  console.log("🚀 ~ UserDetail ~ users:", users);
+  const pending = useSelector((state) => state.users.pending);
+  const error = useSelector((state) => state.users.error);
+  const dispatch = useDispatch();
+
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string | undefined>
   >({});
-
+  useEffect(() => {
+    dispatch(FetchUsers());
+  }, [dispatch]);
   const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -141,7 +148,7 @@ const UserDetail = () => {
     }
     setValidationErrors({});
     await updateUser(values);
-    table.setEditingRow(null); 
+    table.setEditingRow(null);
   };
 
   const openDeleteConfirmModal = (row: MRT_Row<User>) => {

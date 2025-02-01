@@ -8,47 +8,48 @@ import {
 
 export const FetchUsers = createAsyncThunk("users/FetchUsers", async () => {
   const response = await fetchUserData();
-  return response.data;
+   return response;
 });
 export const UpdateUser = createAsyncThunk("users/updateUser", async () => {
   const response = await updateUserData("asds");
-  return response.data;
+  return response;
 });
 export const AddUser = createAsyncThunk("users/addUser", async () => {
   const response = await addUserData("dsfds");
-  return response.data;
+  return response;
 });
 export const DeleteUser = createAsyncThunk("users/deleteUser", async () => {
   const response = await deleteUserData(1);
-  return response.data;
+  return response;
 });
 
 const userSlice = createSlice({
   name: "users",
   initialState: {
     users: [],
-    status: "idle",
+    pending: false,
     error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(FetchUsers.pending, (state) => {
-        state.status = "loading";
+        state.pending = true;
       })
       .addCase(FetchUsers.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.pending = false;
         state.users = action.payload;
       })
       .addCase(FetchUsers.rejected, (state, action) => {
-        state.status = "failed";
+        state.pending = false;
         state.error = action.error.message;
       })
       .addCase(UpdateUser.pending, (state) => {
-        state.status = "loading";
+        state.pending = true;
       })
       .addCase(UpdateUser.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.pending = false;
+
         state.users = action.payload;
       })
       .addCase(UpdateUser.rejected, (state, action) => {
@@ -56,10 +57,11 @@ const userSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(AddUser.pending, (state) => {
-        state.status = "loading";
+        state.pending = true;
       })
       .addCase(AddUser.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.pending = false;
+
         state.users = action.payload;
       })
       .addCase(AddUser.rejected, (state, action) => {
@@ -67,10 +69,11 @@ const userSlice = createSlice({
         state.error = action.error.message;
       })
       .addCase(DeleteUser.pending, (state) => {
-        state.status = "loading";
+        state.pending = true;
       })
       .addCase(DeleteUser.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.pending = false;
+
         state.users = action.payload;
       })
       .addCase(DeleteUser.rejected, (state, action) => {
