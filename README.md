@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/06428aaf-4905-459b-b4d0-2d1bf433f661)# React Redux Table
+# React Redux Table
 
 This project is a React application built using Redux and TypeScript, designed to fetch and manage user data from an external API. It supports basic CRUD operations on a data table.
 
