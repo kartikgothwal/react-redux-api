@@ -1,8 +1,8 @@
 // api.ts
-import axios from 'axios';
-import { IUser } from '../../types';
+import axios from "axios";
+import { IUser } from "../../types";
 
-const API_URL = 'https://jsonplaceholder.typicode.com';
+const API_URL = "https://jsonplaceholder.typicode.com";
 
 export const fetchUserData = async () => {
   const response = await axios.get(`${API_URL}/users`);
@@ -19,7 +19,7 @@ export const deleteUserData = async (userId: string) => {
   return response.data;
 };
 
-export const updateUserData = async (userData: any) => {
+export const updateUserData = async (userData: Partial<IUser>) => {
   const response = await axios.put(`${API_URL}/users/${userData.id}`, userData);
   return response.data;
 };
