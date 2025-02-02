@@ -1,4 +1,4 @@
-# React Redux Table
+![image](https://github.com/user-attachments/assets/06428aaf-4905-459b-b4d0-2d1bf433f661)# React Redux Table
 
 This project is a React application built using Redux and TypeScript, designed to fetch and manage user data from an external API. It supports basic CRUD operations on a data table.
 
@@ -127,5 +127,21 @@ export default tseslint.config({
 
 ## 📌 Author
  Developed by Kartik Gotwal for Dreamcast.
+
+## 🖼️ Screenshots
+User details Rows 
+![image](https://github.com/user-attachments/assets/011b2bc0-8b49-4101-80be-868babf330e7)
+
+-Create New Users
+![image](https://github.com/user-attachments/assets/98a1cb9b-3fa2-4546-89c4-44f9767a71d3)
+
+--Edit Users
+![image](https://github.com/user-attachments/assets/b879a122-1c20-4290-b33c-1abc59c7301e)
+
+--Deleting User
+![image](https://github.com/user-attachments/assets/f75aa29a-1673-4a52-9fd3-0b10de958cb2)
+
+
+
 
 
